@@ -1,14 +1,122 @@
-import { useState } from 'react'
+import { useReducer, useState } from 'react'
 
 import styled, { ThemeProvider } from 'styled-components';
 import { theme1 } from './DefaultStyles';
-function App() {
+const initialState = {
+  currentValue: '0',
+  previousValue: null,
+  operator: null,
+};
 
+interface Payload {
+  num: string;
+  operator?:string | null;
+}
+
+interface AppState {
+  currentValue: string;
+  previousValue: string | null;
+  operator: string | null;
+}
+const calculatorReducer = (state: AppState, action: { type: string; payload?: Payload }): AppState => {
+  const { type, payload } = action; 
+  switch (type) {
+    case 'SET_NUMBER':
+      const newValue =
+        state.currentValue === '0' ? (payload?.num ?? '0') : state.currentValue + (payload?.num ?? '');
+      return {
+        ...state,
+        currentValue: newValue,
+      };
+      case 'SET_OPERATOR':
+        const newOperator = payload?.operator ?? null;
+        return {
+          ...state,
+          previousValue: state.currentValue,
+          currentValue: '0',
+          operator: newOperator
+        };
+      return state;
+      case 'CALCULATE':
+        const { currentValue, operator, previousValue } = state;
+      
+        if (!previousValue || !operator) {
+          return state;
+        }
+      
+        const parsedCurrentValue = parseFloat(currentValue);
+        const parsedPreviousValue = parseFloat(previousValue);
+      
+        let result = 0;
+        switch (operator) {
+          case '+':
+            result = parsedPreviousValue + parsedCurrentValue;
+            break;
+          case '-':
+            result = parsedPreviousValue - parsedCurrentValue;
+            break;
+          case 'x':
+            result = parsedPreviousValue * parsedCurrentValue;
+            break;
+          case '/':
+            result = parsedPreviousValue / parsedCurrentValue;
+            break;
+          default:
+            break;
+        }
+      
+        return {
+          ...state,
+          currentValue: result.toString(),
+          previousValue: null,
+          operator: null,
+        };
+      
+      return state;
+    case 'CLEAR':
+      return initialState
+      return state;
+      case 'DEL':
+        const newValues = state.currentValue.slice(0,-1)
+        return {
+          ...state,
+          currentValue: state.currentValue === '' ? '0':   newValues
+        }
+        return state;
+    default:
+      return state;
+  }
+};
+
+
+function App() {
+  const [state, dispatch] = useReducer(calculatorReducer, initialState);
+  console.log(state.currentValue+ " current");
+  console.log(state.previousValue+ " previousValue");
+  console.log(state.operator+ " operator");
+  const handleNumberClick = (num: string) => {
+    dispatch({ type: 'SET_NUMBER', payload: { num } });
+  };
+
+  const handleOperatorClick = (operator: string) => {
+    dispatch({ type: 'SET_OPERATOR', payload: { num: '', operator } });
+  };
+
+  const handleEqualClick = () => {
+    dispatch({ type: 'CALCULATE' });
+  };
+
+  const handleClearClick = () => {
+    dispatch({ type: 'CLEAR' });
+  };
+  const handleDelateClick = () => {
+    dispatch({ type: 'DEL' });
+  };
   return (
     <ThemeProvider theme={theme1}>
 
     
-    <MainCont>
+    <MainCont prev={state.previousValue}>
       <div className='header'>
         <h1>Calc</h1>
         <p>THEME</p>
@@ -28,28 +136,28 @@ function App() {
         </div>
       </div>
       <div className='user__input'>
-      <div></div>
-      <div></div>
+      <div>{state.currentValue}</div>
+      <div className="prevs">{state.previousValue}{state.operator}</div>
       </div>
       <div className='grid'>
-      <button>7</button>
-      <button>8</button>
-      <button>9</button>
-      <button>DEL</button>
-      <button>4</button>
-      <button>5</button>
-      <button>6</button>
-      <button>+</button>
-      <button>1</button>
-      <button>2</button>
-      <button>3</button>
-      <button>-</button>
-      <button>.</button>
-      <button>0</button>
-      <button>/</button>
-      <button>x</button>
-      <button>Reset</button>
-      <button>=</button>
+      <button onClick={() => handleNumberClick('7')}>7</button>
+      <button onClick={() => handleNumberClick('8')}>8</button>
+      <button onClick={() => handleNumberClick('9')}>9</button>
+      <button onClick={handleDelateClick}>DEL</button>
+      <button onClick={() => handleNumberClick('4')}>4</button>
+      <button onClick={() => handleNumberClick('5')}>5</button>
+      <button onClick={() => handleNumberClick('6')}>6</button>
+      <button onClick={() => handleOperatorClick('+')}>+</button>
+      <button onClick={() => handleNumberClick('1')}>1</button>
+      <button onClick={() => handleNumberClick('2')}>2</button>
+      <button onClick={() => handleNumberClick('3')}>3</button>
+      <button onClick={() => handleOperatorClick('-')}>-</button>
+      <button onClick={() => handleOperatorClick('.')}>.</button>
+      <button onClick={() => handleNumberClick('0')}>0</button>
+      <button onClick={() => handleOperatorClick('/')}>/</button>
+      <button onClick={() => handleOperatorClick('x')}>x</button>
+      <button onClick={handleClearClick}>Reset</button>
+      <button onClick={handleEqualClick}>=</button>
     
       </div>
     </MainCont>
@@ -57,7 +165,7 @@ function App() {
   )
 }
 
-const MainCont = styled.main `
+const MainCont = styled.main<{prev:string | null}> `
       display: flex;
     flex-direction: column;
     width: 300px;
@@ -184,6 +292,9 @@ const MainCont = styled.main `
     color: white;
     width: 140px;
     margin-left: 60px;
+}
+.prevs {
+  font-size: ${props => props.prev ? "13px" : ""};
 }
 `
 
