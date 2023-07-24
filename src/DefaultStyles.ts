@@ -1,4 +1,4 @@
-import { createGlobalStyle } from 'styled-components';
+import {  createGlobalStyle } from 'styled-components';
 
 export const theme1 = {
   mainBackground: "hsl(222, 26%, 31%)",
@@ -44,8 +44,21 @@ export const theme3 = {
   textDark: "hsl(52, 100%, 62%)",
   textWhite: "hsl(0, 0%, 100%)",
 };
-
-const GlobalStyles = createGlobalStyle`
+export type Theme = {
+  mainBackground: string;
+  toggleBackground: string;
+  keypadBackground: string;
+  screenBackground: string;
+  keyBackground: string;
+  keyShadow: string;
+  redKeyBackground: string;
+  redKeyShadow: string;
+  orangeKeyBackground: string;
+  orangeKeyShadow: string;
+  textDark: string;
+  textWhite: string;
+};
+const GlobalStyles = createGlobalStyle<{theme: Theme}>`
   :root {
     /* Theme 1 */
     --main-background: ${theme1.mainBackground};
@@ -88,16 +101,11 @@ const GlobalStyles = createGlobalStyle`
     --orange-key-shadow-3: ${theme3.orangeKeyShadow};
     --text-dark-3: ${theme3.textDark};
     --text-white-3: ${theme3.textWhite};
+
+    
   }
 
-  body {
-    height: 100vh;
-    background-color: var(--main-background);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-  }
+ 
 `;
 
 export default GlobalStyles;
